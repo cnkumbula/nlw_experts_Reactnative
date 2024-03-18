@@ -5,7 +5,7 @@ import { Link } from 'expo-router'
 
 import { CategoryButton } from '@/components/category-button'
 import { Header } from '@/components/header'
-import { CATEGORIES, MENU } from '@/utils/data/product'
+import { CATEGORIES, MENU, ProductProps } from '@/utils/data/product'
 import { Product } from '@/components/product'
 import { useCartStore } from '@/stores/cart-stores'
 
@@ -18,7 +18,7 @@ export default function Home() {
   const cartStore = useCartStore()
   const [category, setCategory] = useState(CATEGORIES[0])
 
-  const sectionListRef = useRef<SectionList>(null)
+  const sectionListRef = useRef<SectionList<ProductProps>>(null)
 
   const cartQuantityItems = cartStore.products.reduce((total, product) => total + product.quantity, 0)
   
@@ -43,7 +43,7 @@ export default function Home() {
 
   return (
     <View className="flex-1 pt-8">
-      <Header title="Faca o seu pedido" cardQuantityItems={cartQuantityItems}/>
+      <Header title="Faca o seu pedido" cartQuantityItems={cartQuantityItems}/>
 
       <FlatList
         data={CATEGORIES}
