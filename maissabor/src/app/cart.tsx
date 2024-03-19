@@ -1,4 +1,8 @@
-import { View, Text, ScrollView, Alert } from "react-native"
+import { useState } from "react"
+
+import { View, Text, ScrollView, Alert, Linking } from "react-native"
+
+import { useNavigation } from "expo-router"
 
 import { Feather } from "@expo/vector-icons"
 
@@ -8,17 +12,23 @@ import { Header } from "@/components/header"
 import { Product } from "@/components/product"
 import { Input } from "@/components/input"
 import { Button } from "@/components/button"
+import { LinkButton } from "@/components/link-button"
 
 import { ProductCartProps, useCartStore } from "@/stores/cart-stores"
 
 import { formatCurrency } from "@/utils/functions/format-currency"
-import colors from "tailwindcss/colors"
-import { LinkButton } from "@/components/link-button"
+import { add } from "@/stores/helpers/cart-in-memory"
+
+
 
 
 export default function Cart() { 
 
+  const [address, setaddress] = useState("")
   const cartStore = useCartStore()
+  const navigation = useNavigation()
+  const PHONE_NUMBER = "+258"
+
 
   const total = formatCurrency(cartStore.products.reduce((total, product) => total + 
   product.price * product.quantity,0))
@@ -41,6 +51,38 @@ export default function Cart() {
       }
     ]
     )
+  }
+
+  function handleOrder() {
+
+    if(address.trim().length === 0){
+      return Alert.alert("Endereço obrigatório", "Por favor, insira o endereço de entrega")
+    }
+
+    const products = cartStore.products.map((product) => 
+    `\n ${product.quantity}x ${product.title}`).join("")
+      
+    //Alert.alert("Seu pedido", `Ola, gostaria de fazer o pedido: \n ${products} \n Endereco: ${address}`)
+    //console.log(products)
+
+    const message = `
+    Ola, gostaria de fazer o pedido: 
+    \n ${products} 
+    \n Endereco: ${address}
+    \n Total: ${total}
+    `
+
+    //console.log(message)
+    Linking.openURL(`http://api.whatsapp.com/send?phone=${PHONE_NUMBER}&text=${message}`)
+
+    cartStore.clear()
+    navigation.goBack()
+    //Alert.alert("Seu pedido", `Ola, gostaria de fazer o pedido: \n ${products} \n Endereco: ${address}`)
+    
+
+
+
+
   }
 
 
@@ -77,11 +119,17 @@ export default function Cart() {
       </View>
 
       <View className="p-5">
-        <Input placeholder="Insira o endereco de entrega"/>
+        <Input 
+        placeholder = "Insira o endereco de entrega"
+        onChangeText = {(address) => setaddress(address)}
+        blurOnSubmit = {true}
+        onSubmitEditing = {handleOrder}
+        returnKeyType="send"
+        />
       </View>
 
       <View className="p-5 gap-5">
-        <Button>
+        <Button onPress={handleOrder}>
           <Button.Text>Enviar pedido</Button.Text>
           <Button.Icon>
             <Feather name="arrow-right-circle" size={24} />
