@@ -28,9 +28,16 @@ export default function Cart() {
       {
         text: "Sim",
         onPress: () => {
-          console.log("removendo")
+          cartStore.remove(product.id)
 
         }
+      },
+      {
+        text: "Nao",
+        /*onPress: () => {
+          console.log("nao removendo")
+
+        }*/
       }
     ]
     )

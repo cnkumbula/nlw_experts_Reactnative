@@ -1,6 +1,11 @@
 import { ProductProps } from '@/utils/data/product'
+
 import { create } from 'zustand'
+import { createJSONStorage, persist } from 'zustand/middleware'
+
 import * as cartInMemory from './helpers/cart-in-memory'
+
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export type ProductCartProps = ProductProps & {
   quantity: number
@@ -9,9 +14,11 @@ export type ProductCartProps = ProductProps & {
 type StateProps = {
   products: ProductCartProps[]
   add: (product: ProductProps) => void
+  remove: (productId: string) => void
 }
 
-export const useCartStore = create<StateProps>((set) => ({
+export const useCartStore = create(
+  persist<StateProps>((set) => ({
   products: [],
 
   add: (product: ProductProps) => 
@@ -20,4 +27,16 @@ export const useCartStore = create<StateProps>((set) => ({
 
   })),
 
+  remove: (productId: string) =>
+    set((state) => ({
+      products: cartInMemory.remove(state.products, productId),
+    })),
+
+}), {
+  name: 'maissabor-cart',
+  storage: createJSONStorage(() => AsyncStorage)/*.createStorage({
+    name: 'maissabor-cart',
+  }))*/
+
 }))
+
